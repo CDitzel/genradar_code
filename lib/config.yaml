@@ -1,0 +1,84 @@
+# Params for radar data processing
+proc:
+  log_level: info # CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET
+  args:
+    # src_dir: /media/container/recordings
+    src_dir: /home/ditzel/rDIn
+    # dst_dir: /home/ditzel/scaling/
+    # dst_dir: /home/ditzel/recordings/snow/rD_1chn_256x256_c64_r:1.3m--25.5m_v:-2.7m_s--2.7m_s_nIni32_inStatic
+    dst_dir: /home/ditzel/rDIn
+    # dst_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_new/rD_1chn_256x256_c64_r:1.3m--25.5m_v:-2.7m_s--2.7m_s_nIni32_inStatic
+    # dst_dir: /home/ditzel/recordings/converted/valid_cube_inStatic_new/cube_16chn31vchn_256x256x32_f32_r:1.3m--25.5m_v:-2.7m_s--2.7m_s__a:57.4deg_cmplxMod_nIni_32_inStatic
+    slice_along: Azimuth
+    slice_idx: 0
+    recursive: false
+    write_frequency: 100
+    cutout:
+      rMin: 1.3
+      rMax: 25.58 # meters
+      rPad: 538 # for 256 range pixel
+      vMin: -2.72 #-2.12
+      vMax: 2.72 #2.12
+      vPad: 512
+      aPad: 32
+      nIni: 32
+
+viz:
+  args:
+    # src_dir: /home/ditzel/recordings/converted/train_rD_inStatic
+    src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic
+    # src_dir: /home/ditzel/rDIn
+    # src_dir: /home/ditzel/rad/data/results/test_eval
+    dst_dir: /home/ditzel/rad/data
+    # cmp_dir: /home/ditzel/rDIn/train # second dataset for FID calculation
+    # cmp_dir: /home/ditzel/recordings/fid/cam/256
+    recursive: true
+    batch_size: 100
+    shuffle:
+      # - inter_modal
+      # - None
+      # - inter_dataset
+    tCtx: 0 # in seconds
+    tDis_ctx: .0 # must be divisor for tCtx withour remainder
+    both_mod: False
+    slice_along: #Doppler # Range, Doppler
+    slice_idx: # 0
+    diagnose: false
+    remainder: true
+    trafos: # for dynamic batch statistics, calculate them as the very last
+      rad:  # for static dataset statistics, put operation first
+        # - rescaling_via_in_train_data_rad
+        # - standardization_via_in_train_data_rad
+        # - standardization_via_batch
+        # - rescaling_via_batch
+        # - plus_minus_zeroPointFive
+        # - plus_minus_one
+      cam:
+        # - rescaling_via_train_data_cam
+        # - standardization_via_train_data_cam
+        # - T.Grayscale()
+        # - T.Resize(size=(256,256))
+        # - T.RandomResizedCrop(size=256, scale=(0.9375,0.9375))
+        # - T.RandomOrder([T.RandomHorizontalFlip(p=0.5)])
+        # - T.RandomOrder([T.RandomHorizontalFlip(p=0.5), T.ColorJitter(brightness=0.5)])
+        # - T.RandomChoice([GNoise(0.5, 0.02), T.GaussianBlur(5, (0.1, 2.0)), nn.Identity()])
+        # - standardization_via_batch
+        # - rescaling_via_batch
+        # - plus_minus_one
+        # - plus_minus_zeroPointFive
+  display_modes:
+    # - pure
+    # - frechet_inception_distance # write FID to file
+    # - survey_statistics # write rad and cam (min, max, mean, std and var to file
+    - histogram # write rad and cam data distributions as histograms to pdf
+    # - save_to_disk # writing rad and cam side-by-side to png
+    # - DWT
+    # - WPT
+    # - rawImage
+    # - IF_signal
+    # - camera
+    # - rD_map_and_cam
+    # - range_profile
+    # - rD_map
+    # - rA_map
+    # - radar_cube

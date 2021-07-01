@@ -1,0 +1,144 @@
+exp:
+  name: genradar
+  log_interval: 1
+  log_level: info # CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET
+  seed: #1337
+  debug: false
+  max_epoch: 500
+  nGPU: 1
+  dst_dir: /home/ditzel/rad/data/results
+  save_model: true
+  eval_mode:
+    # - fid
+    # - syn
+    # - cam_prd_two_rows
+    - attn
+    # - reveal
+  collect_grad: 1 # 1 reverts to default. collect_grad x batch_size = actual # # batch_size
+  max_norm: 0.5 # for gradient clipping
+  noise_cond: None #image #tok
+  cam_stepwise: false
+  temp: 1
+  selection_thres: 0 #0.9 # 0 means entire sample space
+  num_samples: 1
+  rad_train_s: hard #cold #hard #hard #soft #hard cold froz
+  cam_train_s: cold #cold #hard #hard #s#oft #hard cold froz
+  rad_synth_s: cold #cold #hard #hard #soft #hard cold froz
+  cam_synth_s: cold #cold #hard #hard #soft #hard cold froz
+  show: 5
+model:
+  name: GenRadar
+  args:
+    load_path:
+      # - /home/ditzel/rad/data/results/genradar/mrm-deep2_2021-06-26_21:51_2nd_k1024_lE512_nL8_nH8_rMlp2_bz16_cchh_allLab_sepEmb_drop0.4_keep0.7_path0.25/epo070__loss_total=5.63372.ckpt_reg
+      # - /home/ditzel/rad/data/results/genradar/mrm-deep2_2021-06-26_22:11_hchh_2nd_k256_lE256_nL4_nH4_rMlp2_drop0.25_keep0.9_scaleCam7_bz24/epo180__loss_total=3.06100.ckpt_reg
+
+      - /home/ditzel/rad/data/results/genradar/mrm-deep2_2021-06-29_23:04_attn/epo038__best_loss_total=3.04027.ckpt
+
+      # old models
+      # - /home/ditzel/rad/data/results/genradar_deep/mrm-deep2_2021-06-28_06:50_old/epo100__loss_total=7.27143.ckpt_reg
+      # - /home/ditzel/rad/data/results/genradar_deep/mrm-deep2_2021-06-28_13:52_old2/epo070__loss_total=7.27169.ckpt_reg
+    only_cam_labels: false
+    sep_embs: true
+    recycle_embs: false
+    scale_loss: 7
+    pkeep: 0.8
+    lEmb: 512
+    nLayer: 8
+    nHead: 8
+    dHead: 64
+    rMlp: 4
+    emb_drop: 0.2
+    attn_drop: 0.2
+    proj_drop: 0.2
+    mlp_drop: 0.2
+    drop_path_rate: 0.2
+    cam_vae:
+      name: DiscreteVAE
+      args:
+        load_path:
+          # /home/ditzel/rad/data/results/cam.ckpt
+
+          # /home/ditzel/rad/data/results/cam/8/epo079__best_loss_total=0.00469.ckpt
+          # /home/ditzel/rad/data/results/cam/16/epo087__best_loss_total=0.00454.ckpt
+          # /home/ditzel/rad/data/results/cam/32/epo101__best_loss_total=0.00438.ckpt
+          # /home/ditzel/rad/data/results/cam/64_d256/epo068__best_loss_total=0.00427.ckpt
+          # /home/ditzel/rad/data/results/cam/128/epo037__best_loss_total=0.00428.ckpt
+          # /home/ditzel/rad/data/results/cam/256_d256/epo059__best_loss_total=0.00422.ckpt
+          # /home/ditzel/rad/data/results/cam/512/epo092__best_loss_total=0.00415.ckpt
+          # /home/ditzel/rad/data/results/cam/1024_d256/epo075__best_loss_total=0.00410.ckpt
+          # /home/ditzel/rad/data/results/cam/2048/epo106__best_loss_total=0.00401.ckpt
+          # /home/ditzel/rad/data/results/cam/4096/epo094__best_loss_total=0.00405.ckpt
+          # /home/ditzel/rad/data/results/cam/8192/epo079__best_loss_total=0.00403.ckpt
+    rad_vae:
+      name: DiscreteVAE
+      args:
+        load_path:
+           # /home/ditzel/rad/data/results/rad.ckpt
+
+          # /home/ditzel/rad/data/results/rad/normal/8/epo053__best_loss_total=0.00874.ckpt
+          # /home/ditzel/rad/data/results/rad/normal/16/epo044__best_loss_total=0.00865.ckpt
+          # /home/ditzel/rad/data/results/rad/normal/32/epo037__best_loss_total=0.00868.ckpt
+          # /home/ditzel/rad/data/results/rad/normal/64_d256/epo024__best_loss_total=0.00858.ckpt
+          # /home/ditzel/rad/data/results/rad/normal/128/epo068__best_loss_total=0.00848.ckpt
+          # /home/ditzel/rad/data/results/rad/normal/256_d256/epo051__best_loss_total=0.00850.ckpt
+          # /home/ditzel/rad/data/results/rad/normal/512/epo039__best_loss_total=0.00847.ckpt
+          # /home/ditzel/rad/data/results/rad/normal/1024_d256/epo071__best_loss_total=0.00842.ckpt
+          # /home/ditzel/rad/data/results/rad/normal/2048/epo063__best_loss_total=0.00843.ckpt
+          # /home/ditzel/rad/data/results/rad/normal/4096/epo050__best_loss_total=0.00844.ckpt
+          # /home/ditzel/rad/data/results/rad/normal/8192/epo071__best_loss_total=0.00836.ckpt
+loss:
+  name: CrossEntropyLoss
+  args: {}
+optim:
+  name: AdamW
+  args:
+    lr: 5e-5
+    # betas: [0.5, 0.999]
+    # amsgrad: True
+    # weight_decay: 1e-1 # default: 1e-2
+lrs:
+  name: ReduceLROnPlateau
+  args:
+    patience: 5
+    factor: 0.5
+    cooldown: 2
+    verbose: true
+train:
+  args: &anchor
+    src_dir: /home/ditzel/recordings/converted/train_rD_inStatic
+    # src_dir: /home/ditzel/rDIn/valid
+    # src_dir: /home/ditzel/tiny_train
+    # src_dir: /home/ditzel/small_train
+    recursive: true
+    batch_size: 1 #5
+    shuffle:
+      # - inter_modal # about 50% matching/non-matching
+      # - all_non_aligned
+      - inter_dataset
+    tCtx: 0 # in seconds
+    tDis_ctx: .0 # must be divisor for tCtx withour remainder
+    both_mod: false
+    remainder: true  # whether to include the remaiing part of the data stream
+    diagnose: false
+    trafos: # for dynamic batch statistics, calculate them as the very last
+      rad:  # for static dataset statistics, put operation first
+        - rescaling_via_batch
+        - plus_minus_one
+      cam:
+        - rescaling_via_train_data_cam
+        - T.Resize(size=(256,256))
+        - plus_minus_zeroPointFive
+valid:
+  args:
+    <<: *anchor
+    # shuffle: #
+    src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_small
+    # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_roundabout
+    # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_max
+    # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_wheels
+    # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_wintercar
+    # src_dir: /home/ditzel/rDIn/valid
+    # src_dir: /home/ditzel/small_valid
+    # shuffle: # No shuffling for validation
+      # - inter_dataset

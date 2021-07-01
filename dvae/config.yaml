@@ -1,0 +1,182 @@
+exp:
+  name: rad_scale #cam
+  log_interval: 1
+  log_level: info # CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET
+  seed: #1337
+  debug: False
+  max_epoch: 1000
+  nGPU: 1
+  save_model: True
+  dst_dir: /home/ditzel/rad/data/results
+  show: 4 # how many samples to show in the last valid epoch
+  soft_idx: true
+  # eval_mode: [fid,norms]
+  # eval_mode: [hist]
+  # eval_mode: [png] #plx
+  eval_mode: [fid] #plx
+  # eval_mode: [pca]
+  # eval_mode: [cat_util]
+  eval_times: 1
+  mod: cam
+loss:
+  name: NormalLoss
+  args: {}
+    # var: [0.0590548366, 0.0620620847, 0.0708486289]
+    # var: 0.0011994275
+model:
+  name: DiscreteVAE
+  args:
+    load_path:
+      # - /home/ditzel/rad/data/results/test/cam.ckpt
+
+      - /home/ditzel/rad/data/results/cam/8/epo079__best_loss_total=0.00469.ckpt
+      # - /home/ditzel/rad/data/results/cam/16/epo087__best_loss_total=0.00454.ckpt
+      # - /home/ditzel/rad/data/results/cam/32/epo101__best_loss_total=0.00438.ckpt
+      # - /home/ditzel/rad/data/results/cam/64_d256/epo068__best_loss_total=0.00427.ckpt
+      # - /home/ditzel/rad/data/results/cam/128/epo037__best_loss_total=0.00428.ckpt
+      # - /home/ditzel/rad/data/results/cam/256_d256/epo059__best_loss_total=0.00422.ckpt
+      # - /home/ditzel/rad/data/results/cam/512/epo092__best_loss_total=0.00415.ckpt
+      # - /home/ditzel/rad/data/results/cam/1024_d256/epo075__best_loss_total=0.00410.ckpt
+      # - /home/ditzel/rad/data/results/cam/2048/epo106__best_loss_total=0.00401.ckpt
+      # - /home/ditzel/rad/data/results/cam/4096/epo094__best_loss_total=0.00405.ckpt
+      # - /home/ditzel/rad/data/results/cam/8192/epo079__best_loss_total=0.00403.ckpt
+
+      # - /home/ditzel/rad/data/results/cam/64_d64/epo122__best_loss_total=0.00685.ckpt
+      # - /home/ditzel/rad/data/results/cam/64_d128/epo035__best_loss_total=0.00553.ckpt
+      # - /home/ditzel/rad/data/results/cam/256_d64/epo156__best_loss_total=0.00607.ckpt
+      # - /home/ditzel/rad/data/results/cam/256_d128/epo146__best_loss_total=0.00456.ckpt
+      # - /home/ditzel/rad/data/results/cam/1024_d64/epo156__best_loss_total=0.00633.ckpt
+      # - /home/ditzel/rad/data/results/cam/1024_d128/epo142__best_loss_total=0.00504.ckpt
+
+
+      # - /home/ditzel/rad/data/results/rad.ckpt
+
+      # - /home/ditzel/rad/data/results/rad/normal/8/epo053__best_loss_total=0.00874.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/16/epo044__best_loss_total=0.00865.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/32/epo037__best_loss_total=0.00868.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/64_d256/epo024__best_loss_total=0.00858.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/128/epo068__best_loss_total=0.00848.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/256_d256/epo051__best_loss_total=0.00850.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/512/epo039__best_loss_total=0.00847.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/1024_d256/epo071__best_loss_total=0.00842.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/2048/epo063__best_loss_total=0.00843.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/4096/epo050__best_loss_total=0.00844.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/8192/epo071__best_loss_total=0.00836.ckpt
+
+      # - /home/ditzel/rad/data/results/rad/normal/64_d64/epo049__best_loss_total=0.00857.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/64_d128/epo036__best_loss_total=0.00851.ckpt
+       # - /home/ditzel/rad/data/results/rad/normal/256_d64/epo015__best_loss_total=0.00912.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/256_d128/epo006__best_loss_total=0.00903.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/1024_d64/epo009__best_loss_total=0.00908.ckpt
+      # - /home/ditzel/rad/data/results/rad/normal/1024_d128/epo004__best_loss_total=0.00900.ckpt
+    io_chn: &io_chn 3
+    nLayers: 4
+    dLatent: &dLatent 64 #256
+    nResBlocks: 2
+    act: &act relu
+    norm: #BatchNorm
+    init_conv: False
+    discretizer:
+      name: SoftDiscretizer
+      args:
+        dLatent: *dLatent
+        nTokens: 1024
+        dTokens: 512
+        act: *act
+        straight_through: False
+        categorical: False
+        init_emb: False
+        kl_weight:
+          name: CosineAnnealing
+          args:
+            t0: 0
+            t1: 0  # always in number of iters
+            v0: 5e-5 #1e-6 #1e-4 #5e-5 # v0 == v1 means no annealing. If set to 0: no kl loss
+            v1: 5e-5 #1e-6 #5e-5
+            every: 1 # match every num_iter/epoch for per epoch trigger
+        temperature:
+          name: ExponentialAnnealing
+          args:
+            t0: 0
+            t1: 17330  #5500 #86650 #180000 #173300 #1800 #90000 #180000
+            v0: 1
+            v1: 0.0625
+            every: 1 #20
+optim_com:
+  name: Adam
+  args:
+    lr: 3e-4 #4.5e-6
+    # betas: &betas [0.5, 0.9]
+    # weight_decay: 1e-4
+lrs_com:
+  name: ReduceLROnPlateau
+  args:
+    patience: 10
+    factor: 0.5
+    cooldown: 2
+    verbose: true
+train:
+  args: &anchor
+    # src_dir: /home/ditzel/recordings/converted/train_rD_inStatic
+    # src_dir: /home/ditzel/small_train
+    src_dir: /home/ditzel/rDIn/valid
+    recursive: true # whether to look for lmdb files recursively
+    batch_size: 32
+    shuffle:
+      # - inter_modal # about 50% matching/non-matching
+      - inter_dataset
+    tCtx: 0 # in seconds
+    tDis_ctx: .0 # must be divisor for tCtx withour remainder
+    both_mod: false
+    remainder: true  # whether to include the remaiing part of the data stream
+    diagnose: false
+    trafos: # for dynamic batch statistics, calculate them as the very last
+      rad:  # for static dataset statistics, put operation first
+        # - rescaling_via_in_train_data_rad
+        # - standardization_via_in_train_data_rad
+        # - standardization_via_batch
+        - rescaling_via_batch
+        # - plus_minus_zeroPointFive
+        - plus_minus_one
+      cam:
+        - rescaling_via_train_data_cam
+        # - standardization_via_train_data_cam
+        # - T.Grayscale()
+        - T.Resize(size=(256,256))
+        # - T.RandomOrder([T.RandomHorizontalFlip(p=0.5)])
+        # - T.RandomResizedCrop(size=256, scale=(0.98, 1.0))  #scale=(0.95, 1.0)
+        # - T.RandomOrder([T.RandomHorizontalFlip(p=0.5), T.ColorJitter(brightness=0.1)])
+        # - T.RandomChoice([GNoise(0.5, 0.02), T.GaussianBlur(5, (0.1, 2.0)), nn.Identity()])
+        # - standardization_via_batch
+        # - rescaling_via_batch
+        # - plus_minus_one
+        - plus_minus_zeroPointFive
+valid:
+  args:
+    <<: *anchor
+    shuffle: # No shuffling for validation
+      # - inter_dataset
+    # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic
+    # src_dir: /home/ditzel/small_valid
+    src_dir: /home/ditzel/rDIn/valid
+    trafos: # for dynamic batch statistics, calculate them as the very last
+      rad:  # for static dataset statistics, put operation first
+        # - rescaling_via_in_train_data_rad
+        # - standardization_via_in_train_data_rad
+        # - standardization_via_batch
+        - rescaling_via_batch
+        # - plus_minus_zeroPointFive
+        - plus_minus_one
+      cam:
+        - rescaling_via_train_data_cam
+        # - standardization_via_train_data_cam
+        # - T.Grayscale()
+        - T.Resize(size=(256,256))
+        # - T.RandomResizedCrop(size=256, scale=(0.95, 1.0))
+        # - T.RandomOrder([T.RandomHorizontalFlip(p=0.5)])
+        # - T.RandomOrder([T.RandomHorizontalFlip(p=0.5), T.ColorJitter(brightness=0.5)])
+        # - T.RandomChoice([GNoise(0.5, 0.02), T.GaussianBlur(5, (0.1, 2.0)), nn.Identity()])
+        # - standardization_via_batch
+        # - rescaling_via_batch
+        # - plus_minus_one
+        - plus_minus_zeroPointFive
