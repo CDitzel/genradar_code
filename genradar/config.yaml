@@ -10,33 +10,30 @@ exp:
   save_model: true
   eval_mode:
     # - fid
-    # - syn
-    # - cam_prd_two_rows
-    - attn
-    # - reveal
+    # - syn # regular colored plots
+    # - cam_prd_tmp_ctx # temp ablation
+    - cam_prd_vid_ctx # temp ablation
+    # - attn
+    # - reveal # successive build up
+    # - vid_reveal # successive build up
   collect_grad: 1 # 1 reverts to default. collect_grad x batch_size = actual # # batch_size
   max_norm: 0.5 # for gradient clipping
   noise_cond: None #image #tok
   cam_stepwise: false
   temp: 1
-  selection_thres: 0 #0.9 # 0 means entire sample space
+  selection_thres: 1 #0 #0.9 # 0 means entire sample space
   num_samples: 1
   rad_train_s: hard #cold #hard #hard #soft #hard cold froz
   cam_train_s: cold #cold #hard #hard #s#oft #hard cold froz
-  rad_synth_s: cold #cold #hard #hard #soft #hard cold froz
-  cam_synth_s: cold #cold #hard #hard #soft #hard cold froz
+  rad_synth_s: hard #cold #hard #hard #soft #hard cold froz
+  cam_synth_s: hard #cold #hard #hard #soft #hard cold froz
   show: 5
 model:
   name: GenRadar
   args:
     load_path:
-      # - /home/ditzel/rad/data/results/genradar/mrm-deep2_2021-06-26_21:51_2nd_k1024_lE512_nL8_nH8_rMlp2_bz16_cchh_allLab_sepEmb_drop0.4_keep0.7_path0.25/epo070__loss_total=5.63372.ckpt_reg
-      # - /home/ditzel/rad/data/results/genradar/mrm-deep2_2021-06-26_22:11_hchh_2nd_k256_lE256_nL4_nH4_rMlp2_drop0.25_keep0.9_scaleCam7_bz24/epo180__loss_total=3.06100.ckpt_reg
+      - /home/ditzel/rad/data/results/genradar/mrm-deep2_2021-06-26_22:11_hchh_2nd_k256_lE256_nL4_nH4_rMlp2_drop0.25_keep0.9_scaleCam7_bz24/epo180__loss_total=3.06100.ckpt_reg
 
-      - /home/ditzel/rad/data/results/genradar/mrm-deep2_2021-06-29_23:04_attn/epo038__best_loss_total=3.04027.ckpt
-
-      # old models
-      # - /home/ditzel/rad/data/results/genradar_deep/mrm-deep2_2021-06-28_06:50_old/epo100__loss_total=7.27143.ckpt_reg
       # - /home/ditzel/rad/data/results/genradar_deep/mrm-deep2_2021-06-28_13:52_old2/epo070__loss_total=7.27169.ckpt_reg
     only_cam_labels: false
     sep_embs: true
@@ -111,7 +108,7 @@ train:
     # src_dir: /home/ditzel/tiny_train
     # src_dir: /home/ditzel/small_train
     recursive: true
-    batch_size: 1 #5
+    batch_size: 1 #1 #20 #1 #5
     shuffle:
       # - inter_modal # about 50% matching/non-matching
       # - all_non_aligned
@@ -132,12 +129,13 @@ train:
 valid:
   args:
     <<: *anchor
-    # shuffle: #
+    shuffle: #
     src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_small
     # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_roundabout
     # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_max
     # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_wheels
     # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_wintercar
+    # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_wintergrass
     # src_dir: /home/ditzel/rDIn/valid
     # src_dir: /home/ditzel/small_valid
     # shuffle: # No shuffling for validation

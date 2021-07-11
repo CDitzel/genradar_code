@@ -43,7 +43,7 @@ from matplotlib import pyplot as plt
 import matplotlib.ticker as mticker
 import matplotlib.patches as mpatches
 import matplotlib as mpl
-
+import matplotlib
 
 torch.set_printoptions(profile="full", linewidth=500, precision=10)
 pp = pprint.PrettyPrinter(indent=4)
@@ -228,9 +228,11 @@ def main():
 
             path, stem = os.path.split(saved_model)
             fp = path + '/' + 'eval'
+            fp_recon = path + '/' + 'recon'
             fp_perplx = path + '/' + 'eval/perplx'
             os.makedirs(fp, exist_ok=True)
             os.makedirs(fp_perplx, exist_ok=True)
+            os.makedirs(fp_recon, exist_ok=True)
             nTok = model.discretizer.nTokens
             nSamples = 0
             nBatches = 0
@@ -250,7 +252,7 @@ def main():
                 # ONLY enable 256depth models of K: 64, 256, 1024
                 """
                 emb_256 = model.discretizer.embedding.weight
-
+p
                 model_128_path = path.replace('d256','d128') + '/model.ckpt'
                 cfg.model.args['load_path'] = model_128_path
                 model = eval(f"lib.{cfg.model.name}")(**cfg.model.args).to(dev).eval()
@@ -319,8 +321,8 @@ def main():
                     # print(mod.min())
                     # print(mod.max())
                     with torch.no_grad():
-                        # _, rec, _, _ = model(mod, cfg.exp.soft_idx)
-                        _, rec, _, _, _ = model(mod, cfg.exp.soft_idx)
+                        _, rec, _, _ = model(mod, cfg.exp.soft_idx)
+                        # _, rec, _, _, _, z= model(mod, cfg.exp.soft_idx)
                         (warm_gumbel_t, argmax_t, categorical_t, cold_gumbel_t) = model.discretize(mod, cfg.exp.soft_idx)
 
                         # argmax_t = rearrange(argmax_t, "b (h w)-> b (w h)", h=16)
@@ -328,14 +330,14 @@ def main():
                         if 'cat_util' in cfg.exp.eval_mode:
                             for i in range(argmax_t.shape[0]):
                                 cat_util += F.one_hot(argmax_t[i], nTok)
-                                pmf += rearrange(z[i], 'k h w -> (h w) k').softmax(dim= -1)
-                                max_masses = torch.amax(z[i].softmax(0), dim=0).flatten()
-                                min_masses = torch.amin(z[i].softmax(0), dim=0).flatten()
-                                for c in range(len(max_masses)):
-                                    if max_masses[c] > min_max_masses[c, 0]:
-                                        min_max_masses[c, 0] = max_masses[c]
-                                    if min_masses[c] > min_max_masses[c, 1]:
-                                        min_max_masses[c, 1] = min_masses[c]
+                                # pmf += rearrange(z[i], 'k h w -> (h w) k').softmax(dim= -1)
+                                # max_masses = torch.amax(z[i].softmax(0), dim=0).flatten()
+                                # min_masses = torch.amin(z[i].softmax(0), dim=0).flatten()
+                                # for c in range(len(max_masses)):
+                                    # if max_masses[c] > min_max_masses[c, 0]:
+                                        # min_max_masses[c, 0] = max_masses[c]
+                                    # if min_masses[c] > min_max_masses[c, 1]:
+                                        # min_max_masses[c, 1] = min_masses[c]
 
                         # rad_toks = torch.ones(256, 256).to(rad_toks)
                         # cam_toks = torch.ones(256, 256).to(cam_toks)
@@ -506,38 +508,93 @@ def main():
                         psnr_cold_gumbel.update(torch.sum(10.0 * torch.log10(mod.max() ** 2 / (mse_cold_gumbel_val + 1e-10))))
 
                     if 'png' in cfg.exp.eval_mode:
-                        U.save_image(last_batch, fp=f'{fp}/{str(i).zfill(5)}.png', normalize=True)
+                        # fig, ax = plt.subplots(nrows=5, figsize=(last_batch.shape[0] / 10, last_batch.shape[1] /
+                                                        # 10), dpi=100, frameon=False, sharex=True, sharey=True)
+                        # fig, ax = plt.subplots(nrows=5, figsize=(25.6, 5 * 25.6), frameon=False)#, sharex=True, sharey=True)
+                        fig = plt.figure(figsize=(25.6, 5 * 25.6))#, frameon=False)
+                        gs = fig.add_gridspec(5, hspace=0)
+                        ax = gs.subplots(sharey=False, sharex=False)
+
+
+                        mod = rearrange(mod[0], 'c h w -> h w c').cpu()
+                        mod = (mod - mod.min()) / (mod.max() - mod.min())
+                        mode = rearrange(argmax_t_rec[0], 'c h w -> h w c').cpu()
+                        mode = (mode - mode.min()) / (mode.max() - mode.min())
+                        concrete = rearrange(warm_gumbel_t_rec[0], 'c h w -> h w c').cpu()
+                        concrete = (concrete - concrete.min()) / (concrete.max() - concrete.min())
+                        categorical = rearrange(categorical_t_rec[0], 'c h w -> h w c').cpu()
+                        categorical = (categorical - categorical.min()) / (categorical.max() - categorical.min()).cpu()
+
+                        for j in range(5):
+                             ax[j].set_xticks([])
+                             ax[j].set_yticks([])
+
+                        # ax[0].imshow(mod, interpolation ='none',aspect='auto')
+                        # ax[1].imshow(mode, interpolation ='none',aspect='auto')
+                        # ax[2].imshow(concrete, interpolation ='none',aspect='auto')
+                        # ax[3].imshow(categorical, interpolation ='none',aspect='auto')
+
+                        ax[0].imshow(torch.rot90(mod, 1, [0, 1]), interpolation ='none',aspect='auto', cmap='gray')
+                        ax[1].imshow(torch.rot90(mode, 1, [0, 1]), ='none',aspect='auto',cmap='gray')
+                        ax[2].imshow(torch.rot90(concrete, 1, [0, 1]), interpolation ='none',aspect='auto', cmap='gray')
+                        ax[3].imshow(torch.rot90(categorical, 1, [0, 1]), interpolation ='none',aspect='auto', cmap='gray')
+
+                        ax[0].set_ylabel(r'\textbf{Input}',fontsize=100, labelpad=40)
+                        ax[1].set_ylabel(r'\textbf{Mode}',fontsize=100, labelpad=40)
+                        ax[2].set_ylabel(r'\textbf{Concrete}',fontsize=100, labelpad=40)
+                        ax[3].set_ylabel(r'\textbf{Categorical}',fontsize=100, labelpad=40)
+                        matplotlib.rcParams['text.latex.preamble'] = [r'\boldmath']
+                        ax[4].set_ylabel(r'\textbf{Frequency}',fontsize=100, labelpad=40)
+                        ax[4].set_xlabel(r'\textbf{Category $K=256$}',fontsize=100, labelpad=50)
+                        cats = 256 * categorical_bins / categorical_bins.max()
+                        ax[4].bar(torch.arange(nTok), cats, color='b')#, width=0.1)
+
+                        top_side = ax[4].spines["top"]
+                        left_side = ax[4].spines["left"]
+                        right_side = ax[4].spines["right"]
+                        bottom_side = ax[4].spines["bottom"]
+                        top_side.set_visible(False)
+                        left_side.set_visible(False)
+                        right_side.set_visible(False)
+                        bottom_side.set_visible(False)
+
+                        fig.savefig(f'{fp_recon}/{str(i).zfill(5)}.png', dpi = 25, bbox_inches="tight")
+                        plt.close(fig)
+                        # U.save_image(last_batch, fp=f'{fp}/{str(i).zfill(5)}.png', normalize=True)
+                        # exit()
 
             if 'cat_util' in cfg.exp.eval_mode:
-                fig = plt.figure(figsize=(cat_util.shape[1] / 100, cat_util.shape[1] / 100), dpi=100)
+                fig = plt.figure(figsize=(cat_util.shape[1] / 10, cat_util.shape[1] / 10), dpi=100)
                 ax = fig.add_subplot(2,2,1)
-                ax.set_xlabel(f"Category $K$", fontsize=4)
-                ax.set_ylabel(r'Latent variable $\bm{c}$', fontsize=4)
+                matplotlib.rcParams['text.latex.preamble'] = [r'\boldmath']
+                ax.set_xlabel(r'\textbf{Category}', fontsize=40)
+                ax.set_ylabel(r'\textbf{Latent variable}', fontsize=40)
                 plt.rcParams['xtick.top'] = plt.rcParams['xtick.labeltop'] = True
                 ax.set_xticks([])
                 ax.set_yticks([])
-                ax.imshow(cat_util.cpu(), interpolation='none', cmap='bone')
-                fig.savefig(f'{path}/cat_util_{nTok}.png', dpi=1000, pad_inches=0.0, bbox_inches="tight")
+                ax.imshow(cat_util.cpu(), interpolation='none', cmap='binary')
+                fig.savefig(f'{path}/extended_new_cat_util_{nTok}.png', dpi=100, pad_inches=0.0, bbox_inches="tight")
 
-                fig = plt.figure(figsize=(cat_util.shape[1] / 100, cat_util.shape[1] / 100), dpi=100)
+                fig = plt.figure(figsize=(cat_util.shape[1] / 10, cat_util.shape[1] / 10), dpi=100)
                 ax = fig.add_subplot(2,2,1)
-                ax.set_xlabel(f"Category $K$", fontsize=4)
-                ax.set_ylabel(r'Latent variable $\bm{c}$', fontsize=4)
+                matplotlib.rcParams['text.latex.preamble'] = [r'\boldmath']
+                ax.set_xlabel(r'\textbf{Category}', fontsize=40)
+                ax.set_ylabel(r'\textbf{Latent variable}', fontsize=40)
                 plt.rcParams['xtick.top'] = plt.rcParams['xtick.labeltop'] = True
                 ax.set_xticks([])
                 ax.set_yticks([])
-                ax.imshow(pmf.cpu(), interpolation='none', cmap='bone')
-                fig.savefig(f'{path}/pmf_{nTok}.png', dpi=1000, pad_inches=0.0, bbox_inches="tight")
+                # ax.imshow(pmf.cpu(), interpolation='none', cmap='binary')
+                fig.savefig(f'{path}/extended_new_pmf_{nTok}.png', dpi=100, pad_inches=0.0, bbox_inches="tight")
+                exit()
+                # fig = plt.figure(figsize=(cat_util.shape[1] / 100, cat_util.shape[1] / 100), dpi=100)
+                # ax = fig.add_subplot(2,2,1)
+                # ax.bar(torch.arange(256), min_max_masses[:, 0], color='b', width=0.5)
 
-                fig = plt.figure(figsize=(cat_util.shape[1] / 100, cat_util.shape[1] / 100), dpi=100)
-                ax = fig.add_subplot(2,2,1)
-                ax.bar(torch.arange(256), min_max_masses[:, 0], color='b', width=0.5)
-
-                fig.savefig(f'{path}/max_probs_{nTok}.png', dpi=1000, pad_inches=0.0, bbox_inches="tight")
-                fig = plt.figure(figsize=(cat_util.shape[1] / 100, cat_util.shape[1] / 100), dpi=100)
-                ax = fig.add_subplot(2,2,1)
-                ax.bar(torch.arange(256), min_max_masses[:, 1], color='r', width=0.5)
-                fig.savefig(f'{path}/min_probs_{nTok}.png', dpi=1000, pad_inches=0.0, bbox_inches="tight")
+                # fig.savefig(f'{path}/max_probs_{nTok}.png', dpi=1000, pad_inches=0.0, bbox_inches="tight")
+                # fig = plt.figure(figsize=(cat_util.shape[1] / 100, cat_util.shape[1] / 100), dpi=100)
+                # ax = fig.add_subplot(2,2,1)
+                # ax.bar(torch.arange(256), min_max_masses[:, 1], color='r', width=0.5)
+                # fig.savefig(f'{path}/min_probs_{nTok}.png', dpi=1000, pad_inches=0.0, bbox_inches="tight")
                 # for spine in plt.gca().spines.values():
                     # spine.set_visible(False)
                     # fig.savefig(f'{path}/cat_util_{nTok}.png', dpi = 200, pad_inches=0.0, bbox_inches="tight")

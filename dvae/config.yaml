@@ -12,12 +12,12 @@ exp:
   soft_idx: true
   # eval_mode: [fid,norms]
   # eval_mode: [hist]
-  # eval_mode: [png] #plx
-  eval_mode: [fid] #plx
+  eval_mode: [png] #plx
+  # eval_mode: [fid] #plx
   # eval_mode: [pca]
   # eval_mode: [cat_util]
   eval_times: 1
-  mod: cam
+  mod: rad
 loss:
   name: NormalLoss
   args: {}
@@ -29,7 +29,7 @@ model:
     load_path:
       # - /home/ditzel/rad/data/results/test/cam.ckpt
 
-      - /home/ditzel/rad/data/results/cam/8/epo079__best_loss_total=0.00469.ckpt
+      # - /home/ditzel/rad/data/results/cam/8/epo079__best_loss_total=0.00469.ckpt
       # - /home/ditzel/rad/data/results/cam/16/epo087__best_loss_total=0.00454.ckpt
       # - /home/ditzel/rad/data/results/cam/32/epo101__best_loss_total=0.00438.ckpt
       # - /home/ditzel/rad/data/results/cam/64_d256/epo068__best_loss_total=0.00427.ckpt
@@ -48,15 +48,14 @@ model:
       # - /home/ditzel/rad/data/results/cam/1024_d64/epo156__best_loss_total=0.00633.ckpt
       # - /home/ditzel/rad/data/results/cam/1024_d128/epo142__best_loss_total=0.00504.ckpt
 
-
-      # - /home/ditzel/rad/data/results/rad.ckpt
+      # - /home/ditzel/rad/data/results/test_rad/rad.ckpt
 
       # - /home/ditzel/rad/data/results/rad/normal/8/epo053__best_loss_total=0.00874.ckpt
       # - /home/ditzel/rad/data/results/rad/normal/16/epo044__best_loss_total=0.00865.ckpt
       # - /home/ditzel/rad/data/results/rad/normal/32/epo037__best_loss_total=0.00868.ckpt
       # - /home/ditzel/rad/data/results/rad/normal/64_d256/epo024__best_loss_total=0.00858.ckpt
       # - /home/ditzel/rad/data/results/rad/normal/128/epo068__best_loss_total=0.00848.ckpt
-      # - /home/ditzel/rad/data/results/rad/normal/256_d256/epo051__best_loss_total=0.00850.ckpt
+      - /home/ditzel/rad/data/results/rad/normal/256_d256/epo051__best_loss_total=0.00850.ckpt
       # - /home/ditzel/rad/data/results/rad/normal/512/epo039__best_loss_total=0.00847.ckpt
       # - /home/ditzel/rad/data/results/rad/normal/1024_d256/epo071__best_loss_total=0.00842.ckpt
       # - /home/ditzel/rad/data/results/rad/normal/2048/epo063__best_loss_total=0.00843.ckpt
@@ -121,7 +120,7 @@ train:
     # src_dir: /home/ditzel/small_train
     src_dir: /home/ditzel/rDIn/valid
     recursive: true # whether to look for lmdb files recursively
-    batch_size: 32
+    batch_size: 1 #32
     shuffle:
       # - inter_modal # about 50% matching/non-matching
       - inter_dataset
@@ -157,8 +156,10 @@ valid:
     shuffle: # No shuffling for validation
       # - inter_dataset
     # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic
+    src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_small
     # src_dir: /home/ditzel/small_valid
-    src_dir: /home/ditzel/rDIn/valid
+    # src_dir: /home/ditzel/rDIn/valid
+    # src_dir: /home/ditzel/recordings/converted/valid_rD_inStatic_small
     trafos: # for dynamic batch statistics, calculate them as the very last
       rad:  # for static dataset statistics, put operation first
         # - rescaling_via_in_train_data_rad

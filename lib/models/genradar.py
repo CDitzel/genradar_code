@@ -15,14 +15,9 @@ from torch.distributions import RelaxedOneHotCategorical, OneHotCategorical, Cat
 from torch.distributions.relaxed_categorical import ExpRelaxedCategorical
 
 from .network_utils import *
-from .transformer import Transformer
 # from .minGPT import GPT
 from ..utils import auxiliary
 from .resnet import *
-from .dynamicUnet import *
-from .taming import Encoder as tEncoder
-from .taming import Decoder as tDecoder
-from .axial_positional_embedding import *
 from .vit import FixedPositionalEncoding, FixedPositionalEmbedding, Transforming
 import lib
 from lib import load_config, instantiate_or_load, eval_decorator, top_k_ratio, set_requires_grad, LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
@@ -126,7 +121,6 @@ class SoftDiscretizer(nn.Module):
 
     def embed(self, constituents):
         constituents = self.embedding(constituents)
-        # print('shape why', constituents.shape)
         b, n, d = constituents.shape
         h = w = int(sqrt(n))
         constituents = rearrange(constituents, "b (h w) d -> b d h w", h=h, w=w)
@@ -238,11 +232,12 @@ class SoftDiscretizer(nn.Module):
             soft_tokens = samples.argmax(dim= 1)# if soft_idx else z.argmax(dim= 1)
             hard_tokens = z.argmax(dim= 1)
 
+
             # print(torch.amin(torch.amax(z.softmax(1), dim=1).flatten()))
             # print(torch.amax(torch.amax(z.softmax(1), dim=1).flatten()))
             # exit()
+            # hard_tokens = torch.rot90(hard_tokens, 1, [-2, -1])
 
-            # z = torch.rot90(z, 1, [-2, -1])
             if only_quantize:
                 # return tokens.flatten(start_dim=1)
                 return (tokens.flatten(start_dim=1) for tokens in (soft_tokens, hard_tokens, cold_tokens, froz_tokens))
@@ -271,8 +266,10 @@ class SoftDiscretizer(nn.Module):
 
         z_q = einsum("b n h w, n d -> b d h w", samples, self.embedding.weight)
         z_q = self.post_proj(z_q)
+        # return z_q, kl_loss, (tokens.flatten(start_dim=0) for tokens in
+                              # (soft_tokens, hard_tokens, cold_tokens)), -neg_entropy
         return z_q, kl_loss, (tokens.flatten(start_dim=0) for tokens in
-                              (soft_tokens, hard_tokens, cold_tokens)), -neg_entropy
+                              (soft_tokens, hard_tokens, cold_tokens))
 
 
 @instantiate_or_load
@@ -288,7 +285,8 @@ class DiscreteVAE(nn.Module):
     def __call__(self, x, soft_idx):
         # x = self.loss.inmap(x)
         logits = self.encoder(x)
-        z_q, kl_loss, threefold_tokens, neg_ent = self.discretizer(logits, soft_idx=soft_idx)
+        # z_q, kl_loss, threefold_tokens, neg_ent = self.discretizer(logits, soft_idx=soft_idx)
+        z_q, kl_loss, threefold_tokens = self.discretizer(logits, soft_idx=soft_idx)
         perplx, cluster_use = [], []
         for i, tok in enumerate(threefold_tokens):
             stats = self.perplexity(tok)
@@ -296,8 +294,8 @@ class DiscreteVAE(nn.Module):
             cluster_use.append(stats[1])
 
         rec = self.decoder(z_q)
-        # rec = torch.tanh(rec)
-        return kl_loss, rec, perplx, cluster_use, neg_ent
+        # return kl_loss, rec, perplx, cluster_use, neg_ent
+        return kl_loss, rec, perplx, cluster_use
 
     @torch.no_grad()
     @eval_decorator
@@ -534,8 +532,8 @@ class GenRadar(nn.Module):
             not self.transformer.training
         ), "disable transformer dropout for infereence etc."
 
-        print(f'Sampling camera toks from a multinomial with ' +
-              f'{max(int((1 - thld) * self.cam_nToks), 1)} realizations')
+        # print(f'Sampling camera toks from a multinomial with ' +
+              # f'{max(int((1 - thld) * self.cam_nToks), 1)} realizations')
 
         rad_toks, cam_toks, rad_faith, cam_faith = self(rad, cam, rad_s, cam_s, infer=True, noise_cond=noise_cond)
 

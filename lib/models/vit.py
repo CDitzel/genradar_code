@@ -184,7 +184,7 @@ class Attention(nn.Module):
             # print(att[0, 0, 255:266])
             # exit()
         att = F.softmax(att, dim=-1)
-        self.att_maps = att.detach().masked_fill(mask == 0, 1.0)
+        self.att_maps = att.detach().masked_fill(mask == 0, 0.0)
         # del mask
         att = self.att_drop(att)
         out = torch.einsum("bhij,bhjd->bhid", att, v)
