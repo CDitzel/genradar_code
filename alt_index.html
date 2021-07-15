@@ -1,0 +1,401 @@
+<!DOCTYPE HTML>
+<!--
+Based on
+Spatial by TEMPLATED
+templated.co @templatedco
+Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+<html>
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-117339330-4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-117339330-4');
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <title>
+  GenRadar: Self-supervised Probabilistic Camera Synthesis based on Radar Frequencies</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+
+
+</head>
+<body class="landing">
+
+  <!-- Banner -->
+  <section id="banner" style="background-attachment:scroll;">
+    <h2>
+      GenRadar: Self-supervised Probabilistic Camera Synthesis based on Radar Frequencies
+    </h2>
+    <p>
+      <a href="https://www.linkedin.com/in/carsten-ditzel/">Carsten Ditzel</a>,
+      <a href="https://www.uni-ulm.de/in/mrm/institut/mitarbeiter/institutsleitung/prof-dr-ing-klaus-dietmayer/">Klaus Dietmayer</a>,
+
+    </p>
+  </section>
+  <section id="one" class="wrapper style1">
+    <div class="container 75%">
+
+      <div class="image centered captioned align-just"
+           style="margin-bottom:2em; box-shadow:0 0;
+                  text-align:justify">
+        <img src="images/fpp_final.png" alt="" style="border:0px solid black"/>
+        <strong>TL;DR:</strong>
+        We present <em>iPOKE</em>, a model for locally controlled, stochastic video synthesis based on poking a single pixel in a static scene, that enables users to animate still images only with simple mouse drags.
+      </div>
+
+      <div class="row 200%">
+        <div style="width: 25%">
+          <div class="container 25%">
+
+            <div class="image fit captioned align-center"
+                 style="margin-bottom:0em; box-shadow:0 0">
+              <a href="">
+                <img src="images/paper.png" alt="" style="border:1px solid black"/>
+              </a>
+              <a href="https://arxiv.org/abs/2107.02790">arXiv</a>
+              <div class="headerDivider"></div>
+              <a href="images/paper.bib">BibTeX</a>
+              <div class="headerDivider"></div>
+              <a href="https://github.com/CompVis/ipoke">GitHub</a>
+              <br/>
+
+            </div>
+          </div>
+        </div>
+        <div style="text-align: justify; margin-left: 10%; width: 65%">
+          <h1>Abstract</h1>
+          <p> Autonomous systems require a continuous
+          and dependable environment perception for navigation and decision making which
+          is best achieved by combining different sensor types. Radar continues to
+          function robustly in compromised circumstances in which cameras become impaired,
+          guaranteeing a steady inflow of information. Yet camera images provide a more
+          intuitive and readily applicable impression of the world. This work combines the
+          complementary strengths of both sensor types in a unique self-learning fusion
+          approach for a probabilistic scene reconstruction in adverse surrounding
+          conditions. After reducing the memory requirements of the synchronzied
+          measurements through a decoupled stochastic self-supervised compression
+          technique, the proposed algorithm exploits similarities and establishes
+          correspondences between both domains at different feature levels during
+          training. Then, at inference time, relying exclusively on radio frequencies the
+          model successively predicts camera constituents in an autoregressive and
+          self-contained process. These discrete tokens are finally transformed into an
+          instructive view of the respective surrounding allowing to visually perceive
+          potential dangers for important tasks downstream. </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="three" class="wrapper style2 special">
+    <div class="container">
+      <!-- <header class="major"> -->
+        <!-- <h2>Probabilistic Camera Construction via Radar conditioning</h2> -->
+        <!-- <br> -->
+        <!-- </header> -->
+
+        <header class="minor">
+          <h2> Without any explicit annotation, the model relies exclusively on
+          radar-based environment sensing to construct intuitive camera views of
+          the surrounding
+          </h2>
+        </header>
+
+        <div class="row 250%">
+          <div class="6u 12u$(xsmall)">
+            <!-- <div class="image fit captioned align-just"> -->
+  		    <div class="container has-text-centered">
+
+              <!-- <div class="videocontainer"> -->
+                <!-- <video controls class="videothing"> -->
+                  <!-- <source src="images/B3-GUI_Demo_2.mp4" type="video/mp4"> -->
+                  <img src="./resources/teaser_scaled.png" width="1000" />
+                  <figcaption>
+                  <font color="red">Camera view generation </font> based solely
+                    on <font color="green"> radar-frequency information.</font>
+                    The synchronized <font color="blue">camera
+                    ground-truth</font> is supplied for visual reference
+                    only. The models generally succeed in infering the essential
+                    characteristics and key features of the underlying
+                    real-world scenery. Less confidence is shown for the exact
+                    localization of dynamic objects in rapidly changing
+                    environments, particularly if visible in only one of the
+                  sensors, thus lacking cross-modal correspondence.
+                </figcaption>
+                  <!-- </video> -->
+              <!-- </div> -->
+              </div>
+            </div>
+            <div class="6u$ 12u$(xsmall)">
+        </section>
+
+		<!-- Two -->
+		<section id="two" class="wrapper style2 special">
+		  <div class="container">
+			<header class="major">
+			  <h2>Approach</h2>
+              <br>The entire algorithm comprises two stages which are
+              both trained end-to-end in a self-supervised fashion without the
+              need for expensive and time-consuming annotations.
+
+              Only after the training of both stages has been completed are
+              environment predictions performed.
+
+              Both highly-compressed multimodal data streams are then used in
+              the second phase to autoregres-sively train an attention-based
+              model to stochastically predict camera-associated tokens
+              conditioned on radio frequency information.
+
+              To this end, the holistic nature of the previous encoding process
+              is abandoned and only the compression part is retained for dis-
+              cretization purposes. Upon successful sequence construction, the
+              decompresser decodes the modeled integer series into a coherent
+              and expressive camera view, relevant for several important use
+              cases.
+			</header>
+
+            <div class="container 100%">
+              <div class="image fit captioned align-left"
+                   style="margin-bottom:4em; box-shadow:0 0; text-align:justify">
+                <!-- <img src="resources/dvae.png" alt="" style="border:0px solid black"/> -->
+              </div>
+              <h2 class="title is-3">1. Stage: Probabilistic Measurement
+              Compression</h2> Both memory-intensive sensor streams are
+              compressed through categorical variational autoencoders into
+              stochastic integer sequences. The reconstruction quality of the
+              quantized representations is a measure of the models
+              discretization capabilities and used as training objective. The
+              animations show how the networks assign different regions of the
+              input images to distinct categories.
+              <br />
+			  <br />
+              <!-- <div class="image123"> -->
+                <!-- <div class="imageContainer"> -->
+                  <!-- <img src="./resources/reveal.gif" width="200" /> -->
+                  <!-- <p>This is image 1</p> -->
+                <!-- </div> -->
+                <!-- <div class="imageContainer"> -->
+                  <!-- <img src="./resources/reveal.gif" width="200" /> -->
+                  <!-- <p>This is image 1</p> -->
+                <!-- </div> -->
+                <!-- <div class="imageContainer"> -->
+                  <!-- <img src="./resources/reveal.gif" width="200" /> -->
+                  <!-- <p>This is image 1</p> -->
+                <!-- </div> -->
+                <!-- </div> -->
+
+              <!-- <div class="alignRow"> -->
+                <!-- <img src="./resources/rad_cam_compression_1.gif" width="450" style="border:0px solid black"/> -->
+                <!-- <img src="./resources/rad_cam_compression_2.gif" width="450" style="border:0px solid black"/> -->
+                <!-- <img src="./resources/rad_cam_compression_3.gif" width="450" style="border:0px solid black"/> -->
+                <!-- <img src="./resources/rad_cam_compression_4.gif" width="450" style="border:0px solid black"/> -->
+              <!-- </div> -->
+              <!-- <hr> -->
+
+
+                <table align=center width=1100px>
+  			      <tr>
+  	                <td width=200px>
+  					  <center>
+  						<span style="font-size:22px"></span><br>
+  	                	<a href="./resources/rad_cam_compression_1.png"><img
+  	                	onmouseover="this.src='./resources/rad_cam_compression_1.gif';"
+  	                	onmouseout="this.src='./resources/rad_cam_compression_1.png';"
+  	                	src = "./resources/rad_cam_compression_1.png" width =
+  	                	"400"></a><br> <span style="font-size:14px">(hover for
+  	                	our results; click for full images)</span><br> <span
+  	                	style="font-size:14px">extention of Figure 15 from our
+  	                	paper</span></center>
+  	                  </td>
+                      <td width=300px>
+  					    <center>
+  						<span style="font-size:22px"></span><br>
+  	                	<a href="./resources/rad_cam_compression_2.png"><img
+  	                	onmouseover="this.src='./resources/rad_cam_compression_2.gif';"
+  	                	onmouseout="this.src='./resources/rad_cam_compression_2.png';"
+  	                	src = "./resources/rad_cam_compression_2.png" width =
+  	                	"400"></a><br> <span style="font-size:14px">(hover for
+  	                	our results; click for full images)</span><br> <span
+  	                	style="font-size:14px">extention of Figure 15 from our
+  	                	paper</span></center>
+                      </td>
+                      <td width=250px>
+  					    <center>
+  						<span style="font-size:22px"></span><br>
+  	                	<a href="./resources/rad_cam_compression_3.png"><img
+  	                	onmouseover="this.src='./resources/rad_cam_compression_3.gif';"
+  	                	onmouseout="this.src='./resources/rad_cam_compression_3.png';"
+  	                	src = "./resources/rad_cam_compression_3.png" width =
+  	                	"400"></a><br> <span style="font-size:14px">(hover for
+  	                	our results; click for full images)</span><br> <span
+  	                	style="font-size:14px">extention of Figure 15 from our
+  	                	paper</span></center>
+                    </tr>
+  		          </table>
+  		          <br><br>
+  	  	<hr>
+
+
+            <div class="container 100%">
+              <h2 class="title is-3">2. Stage: Crossmodal Modeling of
+              Measurement Constituents</h2> Using the memory-reduced domain
+              representations, an autoregressive transformer model identifies
+              links between radar and camera measurements and learns to
+              recognize crossmodal relations between both modalities. Below
+              animation shows the inter-modal attention span for every head in
+              every layer of the model. Each matrix denotes the strength with
+              which the flattened camera part pay attention to the flattened
+              <br />
+			  <br />
+              <a href="./resources/attn.png"><img
+  	                	onmouseover="this.src='./resources/attn.gif';"
+  	                	onmouseout="this.src='./resources/attn.png';"
+  	                	src = "./resources/attn.png"
+  	                	width = "1000"></a>
+              <!-- <div class="image fit captioned align-left" -->
+                   <!-- style="margin-bottom:4em; box-shadow:0 0; text-align:justify"> -->
+                <!-- <img src="./resources/attn.gif" width="1000" style="border:0px solid black"/> -->
+              <!-- </div> -->
+            </div>
+          </div>
+        </section>
+
+        <section id="four" class="wrapper style2 special">
+          <div class="container 85%">
+            <header class="major">
+              <h2>Range-Doppler conditioned SYNTHESIS OF CAMERA Views</h2>
+            </header>
+            <header class="minor">
+              <h2> Controlled Stochastic Video Synthesis </h2>
+            </header>
+
+            <div class="row 250%">
+              <div class="6u 12u$(xsmall)">
+                <div class="image fit captioned align-just">
+                  <div class="videocontainer">
+                    <video controls class="videothing">
+                      <source src="./resources/rad_cam_compression_1.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                    <b>Controlled stochastic video synthesis on PokingPlants [1].</b> Each rows show different samples from our learned residual kinematics distribution for the same poke, indicating our model to be capable of stochastically synthesize motion which can while maintaining localized control.
+                  </div>
+                </div>
+                <div class="6u$ 12u$(xsmall)">
+
+                  <div class="image fit captioned align-just">
+                    <!-- <div class="videocontainer"> -->
+                      <!-- <video controls class="videothing"> -->
+                        <!-- <source src="images/A1.2-Samples_Iper.mp4" type="video/mp4"> -->
+                        <!-- </video> -->
+                  </div>
+                  <b>Controlled stochastic video synthesis on iPER[2].</b> Each row shows different samples from our learned residual kinematics distribution for the same poke, indicating our model to be capable of stochastically synthesize motion which can while maintaining localized control.
+                </div>
+              </div>
+            </div>
+
+
+
+                    <header class="minor">
+                      <h2>Understanding Object Structure</h2>
+                    </header>
+
+                    <div class="row 250%">
+                      <div class="12u$ 12u$(xsmall)">
+                                <div class="image fit captioned align-just">
+                                  <!--<a href="images/object_structure.png">-->
+                                  <img src="images/body_part.png" alt="" />
+                                  <b>Understanding object structure:</b> By performing 100 random interactions at the same location \(l\) within a given image frame \(x_0\) we obtain varying video sequences, from which we compute motion correlations for \(l\) with all remaining pixels. By mapping these correlations to the pixel space, we visualize distinct object parts.
+                                </div>
+                              </div>
+                            </div>
+
+                            <header class="minor">
+                              <h2>Comparison with other models</h2>
+                            </header>
+                            <p>
+                              <b>Stochastic Video Synthesis:</b> We compare with the recent state of the art in stochastic video prediction and obtain results obtaining higher visual and temporal fidelity as well as more diversity
+                            </p>
+
+                                <b>Controlled Video Synthesis:</b> We compare with the controlled video synthesis baseline of Hao et al. [6] which is the closest related work to our model in controlled video synthesis. iPOKE performs clearly better in terms of controllability and while synthesizing videos with superior visual and temporal coherence . </p>
+                                </section>
+
+
+
+                                <!-- related works ! -->
+
+                                <section id="related" class="wrapper style1 special">
+
+                                  <div class="container 75%">
+                                    <div class="row 250%">
+                                      <div class="12u">
+                                        <h2>References </h2>
+                                        <div class="12u">
+                                          <p align="justify" style="line-height: 1.0em; font-size:0.8em">
+                                            [1] Andreas Blattmann, Timo Milbich, Michael Dorkenwald, and Bjorn Ommer. Understanding object dynamics for interactive image-to-video synthesis. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pages 5171–5181, 2021.
+                                            <br/>
+                                            [2] Wen Liu, Zhixin Piao, Jie Min, Wenhan Luo, Lin Ma, and Shenghua Gao. Liquid warping gan: A unified framework for human motion imitation, appearance transfer and novel view synthesis. In Proceedings of the IEEE/CVF International Conference on
+                                            Computer Vision (ICCV), 2019.
+                                            <br/>
+                                            [3] Catalin Ionescu, Dragos Papava, Vlad Olaru, and Cristian Sminchisescu. Human3.6m: Large scale datasets and predictive methods for 3d human sensing in natural environments. IEEE Transactions on Pattern Analysis and Machine Intelligence, 36(7): 1325–1339, 2014.
+                                            <br/>
+                                            [4] Aliaksandr Siarohin, Stéphane Lathuiliére, Sergey Tulyakov, Elisa Ricci, and Nicu Sebe. First order motion model for image animation. In Adv. Neural Inform. Process. Syst., pages 7135–7145, 2019.
+                                            <br/>
+                                            [5] L. Castrejon, N. Ballas, and A. Courville. Improved conditional vrnns for video prediction. In 2019 IEEE/CVF International
+                                            Conference on Computer Vision (ICCV), 2019.
+                                            <br/>
+                                            [6] Zekun Hao, Xun Huang, and Serge Belongie. Controllable video generation with sparse trajectories.  In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2018.
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </section>
+
+                                  <section id="other_work" class="wrapper style1 special">
+
+                                  </section>
+
+                                            <!-- Six -->
+                                            <section id="six" class="wrapper style3 special"
+                                                     style="background-attachment:scroll;background-position:center bottom;">
+                                              <div class="container">
+                                                <header class="major">
+                                                  <h2>Acknowledgement</h2>
+                                                  <p>
+                                                    The author would like to
+                                                    mention the EleutherAI
+                                                    community and members of the
+                                                    EleutherAI discord channels
+                                                    for fruitful and interesting
+                                                    discussions along the way of
+                                                    composing this
+                                                    paper. Additional thanks to
+                                                    Phil Wang (lucidrains) for
+                                                    his tireless efforts of
+                                                    making attention-based
+                                                    algorithms accessible to the
+                                                    humble deep learning
+                                                    research community.  This
+                                                    page is based on a design by
+                                                    <a href="http://templated.co">TEMPLATED</a>.
+                                                  </p>
+                                                </header>
+                                              </div>
+                                            </section>
+
+		                                    <!-- Scripts -->
+			                                <script src="assets/js/jquery.min.js"></script>
+			                                <script src="assets/js/skel.min.js"></script>
+			                                <script src="assets/js/util.js"></script>
+			                                <script src="assets/js/main.js"></script>
+
+	                                      </body>
+                                        </html>
